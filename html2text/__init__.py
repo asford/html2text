@@ -154,7 +154,7 @@ class HTML2Text(HTMLParser.HTMLParser):
     def outtextf(self, s):
         self.outtextlist.append(s)
         if s:
-            self.lastWasNL = s[-1] == '\n'
+                self.lastWasNL = s[-1] == '\n'
 
     def close(self):
         HTMLParser.HTMLParser.close(self)
@@ -658,7 +658,7 @@ class HTML2Text(HTMLParser.HTMLParser):
             else:
                 self.pre = 0
                 if self.mark_code:
-                    self.out("\n[/code]")
+                    self.out("```")
             self.p()
 
     # TODO: Add docstring for these one letter functions
@@ -710,20 +710,20 @@ class HTML2Text(HTMLParser.HTMLParser):
                     # <pre>stuff...
                     data = "\n" + data
                 if self.mark_code:
-                    self.out("\n[code]")
+                    self.out("\n```")
                     self.p_p = 0
 
             bq = (">" * self.blockquote)
             if not (force and data and data[0] == ">") and self.blockquote:
                 bq += " "
 
-            if self.pre:
+            if self.pre and not self.mark_code:
                 if not self.list:
                     bq += "    "
                 # else: list content is already partially indented
                 for i in range(len(self.list)):
                     bq += "    "
-                data = data.replace("\n", "\n" + bq)
+                data = data.replace("\n", "\n")
 
             if self.startpre:
                 self.startpre = 0
@@ -882,6 +882,8 @@ class HTML2Text(HTMLParser.HTMLParser):
         """
         if not self.body_width:
             return text
+
+        assert not self.mark_code, "mark_code based fench can not be used with body width wrapping"
 
         assert wrap, "Requires Python 2.3."
         result = ''
